@@ -8,75 +8,80 @@ public class Solution {
 
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
-        int n = in.nextInt(); //number of houses
-        int k = in.nextInt(); //distance of transmitter
-        int[] x = new int[n]; //holds location of house
-        
-        //for loop puts location of house
+        int n = in.nextInt();
+        int k = in.nextInt();
+        int[] x = new int[n];
         for(int x_i=0; x_i < n; x_i++){
             x[x_i] = in.nextInt();
         }
-        in.close();
-        //first need to find greatest distance between adjacent houses. For that you need the thing sorted.
-
-        int transDistance;
-        int[] tempX = new int[n];        
-        for (int z = 0 ; z < x.length ; z++)
+        
+        //First issue is the array needs to be sorted.
+        for (int outer =  0 ; outer < x.length - 1 ; outer++)
         {
-            int indexLowest = z;
-            for (int zz = z + 1 ; zz < x.length ; zz++) 
+            int smallestIndex = outer;
+            for (int inner = outer + 1 ; inner < x.length ; inner++)
             {
-                if (x[zz] < x[indexLowest]) 
+                if (x[inner] < x[smallestIndex])
                 {
-					System.out.println(z + "," + zz);
-                    indexLowest = zz;
+                    smallestIndex = inner;
                 }
             }
-            int temp = x[z];
-            x[z] = x[indexLowest];
-            x[indexLowest] = temp;
+            int temp = x[outer];
+            x[outer] = x[smallestIndex];
+            x[smallestIndex] = temp;
         }
-        transDistance = x[1] - x[0];
-        for (int z = 2 ; z < x.length ; z++)
+        
+        //Next we need to find the largest distance between any two houses;
+        int greatestDistance = 0;
+        for (int outer = 1 ; outer < x.length ; outer++)
         {
-            int temp = x[z] - x[z-1];
-            if (temp > transDistance)
+            if ((x[outer] - x[outer-1]) > greatestDistance)
             {
-                transDistance = temp;
+                greatestDistance = x[outer] - x[outer-1];
             }
         }
-
-        //now that we have all the houses sorted and the max distance between two adjacent houses,
-        //we figure out where to place transmitter
+        
+        //Now we find how many transmitters we need
         int count = 0;
+        int[] transHouses = new int[n];
+        int transHouseCount = 0;
         int index = 0;
-        int halfWay = x[0] + k;
-        int endPoint = 0;
-        while (endPoint < x[x.length-1] && endPoint < x[x.length-1]) {
-            if ((x[index+1] -x[index]) > transDistance )
+        int realCenter = 0;
+        while (index < x.length)
+        {
+            //System.out.println("The index is " + index);
+            int initialVal = x[index];
+            
+            if ((x[index] + k) > x[x.length-1])
             {
-                count++;
+                realCenter = x[index];
+                index = x.length;               
+            }
+            while (index < x.length && x[index] <= initialVal + k)
+            {
                 index++;
-                halfWay = x[index] + k;
             }
-            else
+            
+            index = index - 1;
+            int centerValue = x[index];
+            transHouses[transHouseCount] = centerValue;
+            if (realCenter != 0)
             {
-                while(x[index] < halfWay)
-                {
-                    index++;
-                }
-                endPoint = x[index-1] + k;
-                count++;
-                while (x[index] < endPoint && endPoint < x[x.length-1])
-                {
-                    index++;
-                }
-                halfWay = x[index] + k;
-                endPoint = halfWay +k;
+               transHouses[transHouseCount] = realCenter; 
             }
+            transHouseCount++;
+            while (index < x.length && x[index] <= centerValue + k)
+            {
+                index++;
+            }
+            //System.out.println("The last index is " + index);
+            count++;
         }
-
-
+        
+        /*for (int z = 0 ; z < transHouseCount ; z++)
+        {
+            System.out.println("[" + transHouses[z] + "]");
+        }*/
         System.out.println(count);
     }
 }
